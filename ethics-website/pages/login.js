@@ -1,8 +1,17 @@
 import React from 'react';
 import { TextInput, PasswordInput, Button, Group, Box } from '@mantine/core';
 import { useForm, isEmail, hasLength } from '@mantine/form';
+import { useState } from 'react';
+import { supabase } from '../client'
+import styles from '@/styles/Home.module.css'
+import Link from 'next/link';
 
-function Login() {
+{/*const { data, error } = await supabase.auth.signUp({
+    email: 'example@email.com',
+    password: 'example-password',
+  })
+*/}
+export default function Login() {
     const loginForm = useForm({
         initialValues: {
             email: '',
@@ -20,8 +29,12 @@ function Login() {
             <form onSubmit={loginForm.onSubmit(console.log)}>
                 <TextInput mt="sm" label="Email" placeholder="Enter your email" {...loginForm.getInputProps('email')} />
                 <PasswordInput label="Password" placeholder="Password" {...loginForm.getInputProps('password')} />
-                <Group position="right" mt="md">
-                    <Button type="submit">Submit</Button>
+                <Link href={'/register'}>Forgot Password?</Link>
+                <Group position='right' mt="md">
+                    <Link href={'/register'}>Sign Up</Link>
+                </Group>
+                <Group position="center" mt="md">
+                    <Button type="submit" fullWidth variant="outline">Login</Button>
                 </Group>
             </form>
         </Box>
