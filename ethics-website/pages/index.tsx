@@ -1,13 +1,24 @@
-import styles from '@/styles/Home.module.css'
-import Link from 'next/link';
-import { Navbar } from '../navbar.js';
+import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
+import Navbar from '../navbar'
 
-export default function Home() {
+const Home = () => {
+  const session = useSession();
+  const supabase = useSupabaseClient();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (session) return;
+
+    router.push('/login')
+  }, [session])
+
   return (
-    <>
-      <main className={styles.main}>
-        <Navbar />
-      </main>
-    </>
+    <div>
+      <Navbar />
+    </div>
   )
 }
+
+export default Home

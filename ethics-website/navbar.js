@@ -1,16 +1,42 @@
 import React from "react";
+import { supabase } from './client'
+import { useRouter } from 'next/router'
 
-const Navbar = () => {
+function Navbar() {
+    const router = useRouter();
+
+    const signOut = async () => {
+        const { error } = await supabase.auth.signOut();
+
+        if (error) {
+            setError(error.message);
+        }
+    }
+
     return (
-        <nav className="navbar navbar-expand-lg navbar-light bg-light">
-            <a className="navbar-home" href="/">
-                Home
-            </a>
-            <a className="navbar-applications" href="/applications">
-                Applications
-            </a>
-        </nav>
+        <ul>
+            <li>
+                <a href="/">
+                    <img style={{ width: 150, height: 130 }} src={"./images/aston_logo.png"} />
+                </a>
+            </li>
+            <li>
+                <a href="/">
+                    Home
+                </a>
+            </li>
+            <li>
+                <a href="/applications">
+                    Applications
+                </a>
+            </li>
+            <li>
+                <a>
+                    <button onClick={signOut}>Sign out</button>
+                </a>
+            </li>
+        </ul>
     )
 }
 
-export { Navbar } 
+export default Navbar; 
