@@ -9,9 +9,8 @@ const Home = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (session) return;
-
-    router.push('/login')
+    //if (session) return;
+    //router.push('/login')
   }, [session])
 
   return (

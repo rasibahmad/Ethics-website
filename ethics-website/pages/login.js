@@ -43,7 +43,7 @@ export default function Login() {
     }
 
     return (
-        <Box sx={{ maxWidth: 300 }} mx="auto" >
+        <Box sx={{ maxWidth: 300 }} mx="auto">
             <form onSubmit={loginForm.onSubmit(signInWithEmail)}>
                 <img style={{ width: 220, height: 200 }} src={"./images/aston_logo.png"} />
                 <TextInput mt="sm" label="Email" placeholder="Enter email" {...loginForm.getInputProps('email')} />
