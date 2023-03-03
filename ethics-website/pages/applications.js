@@ -120,7 +120,7 @@ export default function Application() {
                     </Box>
                 </form>
             </div>
-            <div className="track applications">
+            <div className="track applications" >
                 <Table highlightOnHover withBorder withColumnBorders>
                     <thead>
                         <tr>

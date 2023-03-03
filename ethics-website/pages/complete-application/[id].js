@@ -1,4 +1,4 @@
-import { Textarea, Group, Button, TextInput, Checkbox } from '@mantine/core'
+import { Textarea, Group, Button, TextInput, Checkbox, FileInput } from '@mantine/core'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { supabase } from '../../client'
@@ -20,6 +20,17 @@ const completeApp = () => {
   const [data_evidence, setDataEvidence] = useState('')
   const [risk, setRisk] = useState('')
   const [comments, setComments] = useState('')
+  const [checked, setChecked] = useState(false)
+  const [isHumanParticipantsChecked, setIsHumanParticipantsChecked] = useState(false)
+  const [isTestingApparatusChecked, setIsTestingApparatusChecked] = useState(false)
+  const [isLoneWorkingChecked, setIsLoneWorkingChecked] = useState(false)
+  const [isTravelRiskChecked, setIsTravelRiskChecked] = useState(false)
+  const [isEmotionalRiskChecked, setIsEmotionalRiskChecked] = useState(false)
+  const [other_risk, setOtherRisk] = useState('')
+  const [isEnvironmentRiskChecked, setIsEnvironmentRiskChecked] = useState(false)
+  const [isConflictInterestChecked, setIsConflictInterestChecked] = useState(false)
+  const [isControversialChecked, setIsControversialChecked] = useState(false)
+  const [isDataRiskChecked, setIsDataRiskChecked] = useState(false)
 
   const applicationForm = async (e) => {
     e.preventDefault()
@@ -29,19 +40,20 @@ const completeApp = () => {
       return
     }
 
-    const {data, error} = await supabase 
+    const { data, error } = await supabase
       .from('applications')
-      .update({student_email, student_number, student_name, project_objectives, study_objectives, data_collection_method, data_collected, participant_recruitment, data_storage, data_evidence, risk, comments})
+      .update({ student_email, student_number, student_name, other_risk, project_objectives, study_objectives, data_collection_method, data_collected, participant_recruitment, data_storage, data_evidence, risk, comments, status: "Supervisor Review" })
       .eq('id', id)
       .select()
 
-      if(error){
-        setApplicationError('Please complete the application form')
-      }
+    if (error) {
+      setApplicationError('Please complete the application form')
+    }
 
-      if (data) {
-        setApplicationError(null)
-      }
+    if (data) {
+      setApplicationError(null)
+      router.push('/applications')
+    }
   }
 
   useEffect(() => {
@@ -58,18 +70,52 @@ const completeApp = () => {
 
       if (data) {
         setApplicationTitle(data.applicationTitle)
-        console.log(data)
       }
     }
     fetchApplication()
   }, [id])
 
+  useEffect(() => {
+    const checkbox = async () => {
+      const { data, error } = await supabase
+        .from('applications')
+        .update({ human_participants: isHumanParticipantsChecked, testing_apparatus: isTestingApparatusChecked, 
+          lone_working: isLoneWorkingChecked, travel_risk: isTravelRiskChecked, emotional_risk: isEmotionalRiskChecked, 
+          environment_risk: isEnvironmentRiskChecked, conflict_interest: isConflictInterestChecked,controversial_work: isControversialChecked, data_risk: isDataRiskChecked })
+        .eq('id', id)
+
+      if (error) {
+        console.log(error.message)
+        setChecked(!checked)
+      }
+    }
+    checkbox()
+  }, [isHumanParticipantsChecked, isTestingApparatusChecked, isLoneWorkingChecked, isTravelRiskChecked, isEmotionalRiskChecked, isEnvironmentRiskChecked, isConflictInterestChecked, isControversialChecked, isDataRiskChecked ])
+
+  async function uploadFile (files) {
+    
+    const [file] = files
+    
+    const {data, error} = await supabase.storage
+      .from('documents')
+      .upload(id + "/", file);
+
+      if (error) {
+        console.log(error)
+      }
+
+      if (data) {
+        console.log(data)
+      }
+      
+  }
+
   return (
     <div className="application">
-      <h3>Application: {applicationTitle}</h3>
+      <h2>Application Title: {applicationTitle}</h2>
       <h4>Application ID: {id}</h4>
       <form onSubmit={applicationForm}>
-        <TextInput
+      <TextInput
           placeholder=""
           label="Student Name"
           //description="Enter name of application to create."
@@ -93,6 +139,21 @@ const completeApp = () => {
           withAsterisk
           onChange={(e) => setStudentNumber(e.target.value)}
         />
+        <h2>Section 0: Ethics Declaration Questions</h2>
+        <h3>Please tick the following boxes if your project will involve any of the following:</h3>
+        <Checkbox label="Human Participants" description="(including all types of interviews, questionnaires, focus groups, records relating to humans, use of online datasets or other secondary data, observations, usability testing, etc.)" onChange={(e) => setIsHumanParticipantsChecked(e.currentTarget.checked)} />
+        <Checkbox label="Testing Apparatus" description="(including where you have developed new apparatus and are testing it for accuracy, including on yourself)" onChange={(e) => setIsTestingApparatusChecked(e.currentTarget.checked)} />
+        <h4>Risk to you, including:</h4>
+        <Checkbox label="Lone working during data collection" onChange={(e) => setIsLoneWorkingChecked(e.currentTarget.checked)} />
+        <Checkbox label="Travel to areas where you may be at risk" onChange={(e) => setIsTravelRiskChecked(e.currentTarget.checked)} />
+        <Checkbox label="Risk of emotional distress" onChange={(e) => setIsEmotionalRiskChecked(e.currentTarget.checked)} />
+        <Checkbox label="Any risk to the environment" onChange={(e) => setIsEnvironmentRiskChecked(e.currentTarget.checked)} />
+        <Checkbox label="Any conflict of interest" onChange={(e) => setIsConflictInterestChecked(e.currentTarget.checked)} />
+        <Checkbox label="Work/research that could be considered controversial or be of reputational risk to Aston University" onChange={(e) => setIsControversialChecked(e.currentTarget.checked)} />
+        <Checkbox label="Social media data and/or data from internet sources that could be regarded as private" onChange={(e) => setIsDataRiskChecked(e.currentTarget.checked)} />
+        <TextInput label="Other: Please outline" radius="md" onChange={(e) => setOtherRisk(e.target.value)} />
+        <h2>Section 1: Study Details</h2>
+        <h3>Please provide the following information about your study. Be as detailed as possible. Where a question is not relevant, please indicate ‘Not Applicable’ but also explain why you believe that to be so.</h3>
         <Textarea
           placeholder=""
           label="Project Objectives"
@@ -173,8 +234,18 @@ const completeApp = () => {
           minRows={2}
           onChange={(e) => setRisk(e.target.value)}
         />
+        <FileInput
+          placeholder="Select Files"
+          label="Attachments"
+          description="Upload all documents for intended study (.docx)"
+          radius="md"
+          withAsterisk
+          multiple
+          accept='.docx'
+          onChange={(e) => uploadFile(e)}
+        />
         <Textarea
-          placeholder=""
+          placeholder="E.g. Questionnaire link"
           label="Additional Comments"
           radius="md"
           autosize
